@@ -77,7 +77,7 @@ class SampleRoute : RouteHandler() {
 ```
 
 ### Pebble templating
-You can easily put Java objects in the front-end using Pebble templating. Declaring Pebble variables is not necessary but helps your IDE recognizing variables.
+You can easily put Java objects in the front-end using Pebble templating. Declaring Pebble variables is not necessary but it helps your IDE recognize variable types.
 
 When transferring Java objects to the front-end you can use them like json.
 ```twig
