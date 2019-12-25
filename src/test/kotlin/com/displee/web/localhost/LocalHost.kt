@@ -7,13 +7,14 @@ import com.google.gson.JsonObject
 class LocalHost : VirtualHost("localhost") {
 
     override fun routes() {
-        super.routes()
-        get("/test", privateHtml().resolve("test.peb"))
-        get("/lol") {
+        super.routes() //for class based routes
+        get("/", publicHtml().resolve("index.html"))
+        get("/test") {
             val json = JsonObject()
             json.addProperty("message", "Hello")
             it.send(json)
         }
+        get("/pebble", privateHtml().resolve("test.peb"))
     }
 
 }

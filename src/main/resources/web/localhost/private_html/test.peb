@@ -1,6 +1,5 @@
 {# @pebvariable name="session" type="io.undertow.server.session.Session" #}
 {# @pebvariable name="request_uri" type="java.lang.String" #}
-{# @pebvariable name="test" type="java.lang.String" #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +7,8 @@
     <title>Test</title>
 </head>
 <body>
-    {{ test }} Jwz broer: {{ session.id }}
+    You're currently on route: "{{ request_uri }}"
+    <br/>
+    Your session id is: {{ session.id }}
 </body>
 </html>

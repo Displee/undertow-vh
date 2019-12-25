@@ -14,7 +14,7 @@ class UndertowVH(private val host: String, private val port: Int, private val ss
 
     constructor(host: String, port: Int): this(host, port, -1)
 
-    public fun initialize() {
+    public fun start() {
         val hosts = virtualHostManager.hosts.keys
         UndertowVHLogger.log("Initializing UndertowVH with ${hosts.size} hosts: $hosts.")
         val builder = Undertow.builder()

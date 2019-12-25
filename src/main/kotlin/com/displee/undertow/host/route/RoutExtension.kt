@@ -33,18 +33,19 @@ public fun HttpServerExchange.getSession(): Session {
     return session
 }
 
-public fun HttpServerExchange.check(vararg params: String): Boolean {
-    return RoutExtension.check(querySingleStringParameters(), *params)
+public fun HttpServerExchange.checkFormData(vararg params: String): Boolean {
+    return RoutExtension.check(getFormDataAsMap(), *params)
 }
 
-public fun HttpServerExchange.queryAsJson(): JsonObject {
+public fun HttpServerExchange.checkQueryParameters(vararg params: String): Boolean {
+    return RoutExtension.check(getQueryParametersAsMap(), *params)
+}
+
+public fun HttpServerExchange.getFormDataAsJson(): JsonObject {
     val json = JsonObject()
-    loopThroughParameters(this) { formData ->
+    loopThroughFormData(this) { formData ->
         for (key in formData) {
             val deque = formData.get(key)
-            if (deque.size != 1) {
-                continue
-            }
             val item = deque.first
             if (item.isFileItem) {
                 continue
@@ -55,9 +56,17 @@ public fun HttpServerExchange.queryAsJson(): JsonObject {
     return json
 }
 
-public fun HttpServerExchange.querySingleStringParameters(): Map<String, String> {
+public fun HttpServerExchange.getQueryParametersAsJson(): JsonObject {
+    val json = JsonObject()
+    for(i in queryParameters) {
+        json.addProperty(i.key, i.value.first)
+    }
+    return json
+}
+
+public fun HttpServerExchange.getFormDataAsMap(): Map<String, String> {
     val map = HashMap<String, String>()
-    loopThroughParameters(this) { formData ->
+    loopThroughFormData(this) { formData ->
         for (key in formData) {
             val deque = formData.get(key)
             if (deque.size != 1) {
@@ -73,9 +82,17 @@ public fun HttpServerExchange.querySingleStringParameters(): Map<String, String>
     return map
 }
 
-public fun HttpServerExchange.queryAllStringParameters(): Map<String, Array<String>> {
+public fun HttpServerExchange.getQueryParametersAsMap(): Map<String, String> {
+    val map = HashMap<String, String>()
+    for(i in queryParameters) {
+        map[i.key] = i.value.first
+    }
+    return map
+}
+
+public fun HttpServerExchange.getAllFormData(): Map<String, Array<String>> {
     val map = HashMap<String, Array<String>>()
-    loopThroughParameters(this) { formData ->
+    loopThroughFormData(this) { formData ->
         for (key in formData) {
             val deque = formData.get(key)
             val list = ArrayList<String>(deque.size)
@@ -91,9 +108,9 @@ public fun HttpServerExchange.queryAllStringParameters(): Map<String, Array<Stri
     return map
 }
 
-public fun HttpServerExchange.querySingleFileParameters(): Map<String, File> {
+public fun HttpServerExchange.getFileFormData(): Map<String, File> {
     val map = HashMap<String, File>()
-    loopThroughParameters(this) { formData ->
+    loopThroughFormData(this) { formData ->
         for (key in formData) {
             val deque = formData.get(key)
             if (deque.size != 1) {
@@ -109,9 +126,9 @@ public fun HttpServerExchange.querySingleFileParameters(): Map<String, File> {
     return map
 }
 
-public fun HttpServerExchange.queryAllFileParameters(): Map<String, Array<File>> {
+public fun HttpServerExchange.getAllFileFormData(): Map<String, Array<File>> {
     val map = HashMap<String, Array<File>>()
-    loopThroughParameters(this) { formData ->
+    loopThroughFormData(this) { formData ->
         for (key in formData) {
             val deque = formData.get(key)
             val list = ArrayList<File>(deque.size)
@@ -127,7 +144,7 @@ public fun HttpServerExchange.queryAllFileParameters(): Map<String, Array<File>>
     return map
 }
 
-private fun loopThroughParameters(exchange: HttpServerExchange, unit: (fromData: FormData) -> Unit) {
+private fun loopThroughFormData(exchange: HttpServerExchange, unit: (fromData: FormData) -> Unit) {
     try {
         val builder = FormParserFactory.builder()
         builder.defaultCharset = Charsets.UTF_8.name()
