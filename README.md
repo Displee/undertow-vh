@@ -5,7 +5,7 @@ This library is serving as a wrapper for Java's most performant webserver `under
 ```
 implementation 'com.displee:undertow-vh:1.0'
 ```
-##Usage
+## Usage
 
 ### Create a virtual host
 ```kotlin
