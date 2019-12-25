@@ -63,9 +63,18 @@ abstract class VirtualHost(
     }
 
     public fun get(template: String?, path: Path): RoutingHandler {
+        return get(template, path, mapOf())
+    }
+
+    public fun get(template: String?, path: Path, model: Map<String, String>): RoutingHandler {
         return get(template, object: RouteHandler() {
             override fun path(): Path? {
                 return path
+            }
+
+            override fun model(exchange: HttpServerExchange) {
+                super.model(exchange)
+                this.model.putAll(model)
             }
         })
     }

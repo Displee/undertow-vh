@@ -1,5 +1,6 @@
 {# @pebvariable name="session" type="io.undertow.server.session.Session" #}
 {# @pebvariable name="request_uri" type="java.lang.String" #}
+{# @pebvariable name="message" type="java.lang.String" #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,5 +11,7 @@
     You're currently on route: "{{ request_uri }}"
     <br/>
     Your session id is: {{ session.id }}
+    <br/>
+    {{ message }}
 </body>
 </html>

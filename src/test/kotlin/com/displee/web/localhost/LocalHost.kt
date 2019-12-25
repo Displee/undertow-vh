@@ -14,7 +14,7 @@ class LocalHost : VirtualHost("localhost") {
             json.addProperty("message", "Hello")
             it.send(json)
         }
-        get("/pebble", privateHtml().resolve("test.peb"))
+        get("/pebble", privateHtml().resolve("test.peb"), mapOf(Pair("message", "Undertow is awesome!")))
     }
 
 }
