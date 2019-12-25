@@ -101,8 +101,6 @@ When transferring Java objects to the front-end you can use them like json.
 Feel free to fork and submit pull requests :)
 
 ## Credits
-Original developers:
-
 - The undertow team (http://undertow.io)
 - Nick Hartskeerl
 - Displee
