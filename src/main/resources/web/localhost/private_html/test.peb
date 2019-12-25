@@ -1,0 +1,13 @@
+{# @pebvariable name="session" type="io.undertow.server.session.Session" #}
+{# @pebvariable name="request_uri" type="java.lang.String" #}
+{# @pebvariable name="jwz" type="java.lang.String" #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+    Jwz broer: {{ session.id }}
+</body>
+</html>
