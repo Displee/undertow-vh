@@ -57,7 +57,7 @@ class SampleRoute : RouteHandler() {
     }
 
     override fun handleRequest(exchange: HttpServerExchange) {
-        //check if we've received the required for this route query params
+        //check if we've received the required query params
         if (!exchange.checkQueryParameters("username", "first_name", "last_name")) {
             exchange.responseSender.send("Error received not enough parameters.")
             return
