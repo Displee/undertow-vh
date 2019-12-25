@@ -11,7 +11,7 @@ class SampleRoute : RouteHandler() {
 
     override fun model(exchange: HttpServerExchange) {
         super.model(exchange)
-        model["jwz"] = "pebble works!"
+        model["test"] = "pebble works!"
     }
 
     override fun path(): Path? {
