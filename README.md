@@ -80,9 +80,10 @@ class SampleRoute : RouteHandler() {
 You can easily put Java objects in the front-end using Pebble templating. Declaring Pebble variables is not necessary but it helps your IDE recognize variable types.
 
 When transferring Java objects to the front-end you can use them like json.
-```twig
+```pebble
 {# @pebvariable name="session" type="io.undertow.server.session.Session" #}
 {# @pebvariable name="request_uri" type="java.lang.String" #}
+{# @pebvariable name="message" type="java.lang.String" #}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -93,6 +94,8 @@ When transferring Java objects to the front-end you can use them like json.
     You're currently on route: "{{ request_uri }}"
     <br/>
     Your session id is: {{ session.id }}
+    <br/>
+    {{ message }}
 </body>
 </html>
 ```
