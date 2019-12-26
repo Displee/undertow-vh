@@ -8,7 +8,7 @@ import io.undertow.UndertowOptions
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
 
-class UndertowVH(private val host: String, private val port: Int, private val sslPort: Int): HttpHandler {
+open class UndertowVH(private val host: String, private val port: Int, private val sslPort: Int): HttpHandler {
 
     private val virtualHostManager = VirtualHostManager()
 
