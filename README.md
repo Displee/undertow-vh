@@ -50,12 +50,6 @@ import io.undertow.server.HttpServerExchange
 @RouteManifest("/register", GET)
 class SampleRoute : RouteHandler() {
 
-    override fun model(exchange: HttpServerExchange) {
-        super.model(exchange)
-        //feel free to pass any parameters to the front end!
-        model["test"] = "pebble works!"
-    }
-
     override fun handleRequest(exchange: HttpServerExchange) {
         //check if we've received the required query params
         if (!exchange.checkQueryParameters("username", "first_name", "last_name")) {
