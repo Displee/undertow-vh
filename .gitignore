@@ -6,3 +6,6 @@ out
 
 # Gradle
 .gradle
+
+# Log files
+*.log

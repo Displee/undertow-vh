@@ -17,7 +17,7 @@
  */
 package com.displee.undertow.host.route
 
-import com.displee.undertow.template.TemplateProcessorFactory
+import com.displee.undertow.template.TemplateProcessorAdapter
 import io.undertow.UndertowLogger
 import io.undertow.io.IoCallback
 import io.undertow.predicate.Predicate
@@ -265,7 +265,7 @@ class VirtualHostRouteHandler : HttpHandler {
                 }
                 //Start of custom template processor
                 val extension: String = FilenameUtils.getExtension(resource.path)
-                val templateProcessor = TemplateProcessorFactory.get(extension)
+                val templateProcessor = TemplateProcessorAdapter.get(extension)
                 if (templateProcessor != null) {
                     val model = HashMap<String, Any>()
                     val output = templateProcessor.render(resource.filePath, model)

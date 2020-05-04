@@ -1,28 +1,25 @@
 package com.displee.undertow.logger
 
+import java.lang.Exception
 import java.util.logging.Level
 import java.util.logging.Logger
 
-class UndertowVHLogger {
+fun log(message: String) {
+    println(message)
+}
 
-    companion object {
+fun log(exception: Exception) {
+    exception.printStackTrace()
+}
 
-        public fun log(message: String) {
-            println(message)
-        }
+fun warn(message: String) {
+    log(message)
+}
 
-        public fun warn(message: String) {
-            log(message)
-        }
+fun err(message: String) {
+    System.err.println(message)
+}
 
-        public fun error(message: String) {
-            System.err.println(message)
-        }
-
-        public fun disableXnioLogger() {
-            Logger.getLogger("org.xnio").level = Level.OFF
-        }
-
-    }
-
+fun disableXnioLogger() {
+    Logger.getLogger("org.xnio").level = Level.OFF
 }

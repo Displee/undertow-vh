@@ -1,6 +1,7 @@
 package com.displee.undertow.host.route
 
-import com.google.common.base.Charsets
+import com.displee.undertow.logger.log
+import com.displee.undertow.util.CHARSET
 import com.google.common.net.MediaType
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
@@ -17,14 +18,14 @@ import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.set
 
-public fun HttpServerExchange.redirect(url: String) {
+fun HttpServerExchange.redirect(url: String) {
     statusCode = StatusCodes.FOUND
     responseHeaders.put(Headers.LOCATION, url)
     endExchange()
 }
 
-public fun HttpServerExchange.getSession(): Session {
-    val sessionManager = getAttachment(SessionManager.ATTACHMENT_KEY);
+fun HttpServerExchange.getSession(): Session {
+    val sessionManager = getAttachment(SessionManager.ATTACHMENT_KEY)
     val sessionConfig = getAttachment(SessionConfig.ATTACHMENT_KEY)
     var session = sessionManager.getSession(this, sessionConfig)
     if (session == null) {
@@ -33,15 +34,15 @@ public fun HttpServerExchange.getSession(): Session {
     return session
 }
 
-public fun HttpServerExchange.checkFormData(vararg params: String): Boolean {
+fun HttpServerExchange.checkFormData(vararg params: String): Boolean {
     return RoutExtension.check(getFormDataAsMap(), *params)
 }
 
-public fun HttpServerExchange.checkQueryParameters(vararg params: String): Boolean {
+fun HttpServerExchange.checkQueryParameters(vararg params: String): Boolean {
     return RoutExtension.check(getQueryParametersAsMap(), *params)
 }
 
-public fun HttpServerExchange.getFormDataAsJson(): JsonObject {
+fun HttpServerExchange.getFormDataAsJson(): JsonObject {
     val json = JsonObject()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -56,7 +57,7 @@ public fun HttpServerExchange.getFormDataAsJson(): JsonObject {
     return json
 }
 
-public fun HttpServerExchange.getQueryParametersAsJson(): JsonObject {
+fun HttpServerExchange.getQueryParametersAsJson(): JsonObject {
     val json = JsonObject()
     for(i in queryParameters) {
         json.addProperty(i.key, i.value.first)
@@ -64,7 +65,7 @@ public fun HttpServerExchange.getQueryParametersAsJson(): JsonObject {
     return json
 }
 
-public fun HttpServerExchange.getFormDataAsMap(): Map<String, String> {
+fun HttpServerExchange.getFormDataAsMap(): Map<String, String> {
     val map = HashMap<String, String>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -82,7 +83,7 @@ public fun HttpServerExchange.getFormDataAsMap(): Map<String, String> {
     return map
 }
 
-public fun HttpServerExchange.getQueryParametersAsMap(): Map<String, String> {
+fun HttpServerExchange.getQueryParametersAsMap(): Map<String, String> {
     val map = HashMap<String, String>()
     for(i in queryParameters) {
         map[i.key] = i.value.first
@@ -90,7 +91,7 @@ public fun HttpServerExchange.getQueryParametersAsMap(): Map<String, String> {
     return map
 }
 
-public fun HttpServerExchange.getAllFormData(): Map<String, Array<String>> {
+fun HttpServerExchange.getAllFormData(): Map<String, Array<String>> {
     val map = HashMap<String, Array<String>>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -108,7 +109,7 @@ public fun HttpServerExchange.getAllFormData(): Map<String, Array<String>> {
     return map
 }
 
-public fun HttpServerExchange.getFileFormData(): Map<String, File> {
+fun HttpServerExchange.getFileFormData(): Map<String, File> {
     val map = HashMap<String, File>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -126,7 +127,7 @@ public fun HttpServerExchange.getFileFormData(): Map<String, File> {
     return map
 }
 
-public fun HttpServerExchange.getAllFileFormData(): Map<String, Array<File>> {
+fun HttpServerExchange.getAllFileFormData(): Map<String, Array<File>> {
     val map = HashMap<String, Array<File>>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -146,27 +147,26 @@ public fun HttpServerExchange.getAllFileFormData(): Map<String, Array<File>> {
 
 private fun loopThroughFormData(exchange: HttpServerExchange, unit: (fromData: FormData) -> Unit) {
     try {
-        val builder = FormParserFactory.builder()
-        builder.defaultCharset = Charsets.UTF_8.name()
-        val formDataParser = builder.build().createParser(exchange) ?: return
+        val factory = FormParserFactory.builder().withDefaultCharset(CHARSET.name()).build()
+        val formDataParser = factory.createParser(exchange) ?: return
         exchange.startBlocking()
         val formData = formDataParser.parseBlocking()
         unit.apply { formData }
         exchange.startBlocking(null)
     } catch(e: Exception) {
-        e.printStackTrace()
+        log(e)
     }
 }
 
-public fun HttpServerExchange.send(json: JsonElement) {
+fun HttpServerExchange.send(json: JsonElement) {
     responseHeaders.put(Headers.CONTENT_TYPE, MediaType.JSON_UTF_8.toString())
     responseSender.send(json.toString())
 }
 
-public class RoutExtension {
+class RoutExtension {
 
     companion object {
-        public fun check(form: JsonObject, vararg params: String): Boolean {
+        fun check(form: JsonObject, vararg params: String): Boolean {
             for(param in params) {
                 if (form.get(param) == null) {
                     return false
@@ -175,7 +175,7 @@ public class RoutExtension {
             return true
         }
 
-        public fun check(form: Map<String, String>, vararg params: String): Boolean {
+        fun check(form: Map<String, String>, vararg params: String): Boolean {
             for(param in params) {
                 if (form[param] == null) {
                     return false

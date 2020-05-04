@@ -2,13 +2,14 @@ package com.displee.undertow.host
 
 import com.displee.undertow.host.route.RouteHandler
 import com.displee.undertow.host.route.RouteManifest
-import com.displee.undertow.logger.UndertowVHLogger
+import com.displee.undertow.host.route.VirtualHostRouteHandler
+import com.displee.undertow.logger.err
+import com.displee.undertow.logger.log
 import io.undertow.predicate.Predicate
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.RoutingHandler
 import io.undertow.server.handlers.resource.PathResourceManager
-import com.displee.undertow.host.route.VirtualHostRouteHandler
 import io.undertow.server.session.*
 import io.undertow.util.HttpString
 import io.undertow.util.Methods
@@ -16,15 +17,12 @@ import org.reflections.Reflections
 import java.nio.file.Path
 import java.nio.file.Paths
 
-abstract class VirtualHost(
-    private val name: String,
-    vararg hosts: String,
-    sessionManager: SessionManager = InMemorySessionManager("SESSION_MANAGER"),
-    sessionConfig: SessionConfig = SessionCookieConfig()
-): RoutingHandler() {
+abstract class VirtualHost(private val name: String, vararg hosts: String) : RoutingHandler() {
 
     var hosts: Array<String> = arrayOf(*hosts)
 
+    private val sessionManager: SessionManager = InMemorySessionManager(KEY)
+    private val sessionConfig: SessionConfig = SessionCookieConfig()
     private val sessionHandler = SessionAttachmentHandler(this, sessionManager, sessionConfig)
     private val resourceManager = PathResourceManager(publicHtml(), 100)
 
@@ -35,39 +33,39 @@ abstract class VirtualHost(
         fallbackHandler = VirtualHostRouteHandler(resourceManager)
     }
 
-    public fun initialize() {
+    fun initialize() {
         routes()
     }
 
-    public open fun routes() {
+    open fun routes() {
         val reflections = Reflections(javaClass.`package`.name + ".route")
         var count = 0
         val classes = reflections.getSubTypesOf(RouteHandler::class.java)
-        for(classz in classes) {
+        for (classz in classes) {
             try {
                 val instance = classz.newInstance()
                 instance.virtualHost = this
                 val manifest = instance.javaClass.getAnnotation(RouteManifest::class.java) ?: continue
                 add(HttpString(manifest.method), manifest.route, instance)
                 count++
-            } catch(t: Throwable) {
+            } catch (t: Throwable) {
                 t.printStackTrace()
-                UndertowVHLogger.error("Unable to create an instance of ${classz.simpleName}.")
+                err("Unable to instantiate ${classz.simpleName}.")
             }
         }
-        UndertowVHLogger.log("Registered $count/${classes.size} routes for hosts: ${hosts.contentToString()}.")
+        log("Registered $count/${classes.size} routes for hosts: ${hosts.contentToString()}.")
     }
 
     fun handle(exchange: HttpServerExchange) {
         sessionHandler.handleRequest(exchange)
     }
 
-    public fun get(template: String?, path: Path): RoutingHandler {
+    fun get(template: String?, path: Path): RoutingHandler {
         return get(template, path, mapOf())
     }
 
-    public fun get(template: String?, path: Path, model: Map<String, String>): RoutingHandler {
-        return get(template, object: RouteHandler() {
+    fun get(template: String?, path: Path, model: Map<String, String>): RoutingHandler {
+        return get(template, object : RouteHandler() {
             override fun path(): Path? {
                 return path
             }
@@ -92,7 +90,7 @@ abstract class VirtualHost(
     }
 
     @Synchronized
-    public fun patch(template: String?, handler: HttpHandler?): RoutingHandler? {
+    fun patch(template: String?, handler: HttpHandler?): RoutingHandler? {
         return add(Methods.PATCH, template, handler)
     }
 
@@ -102,20 +100,28 @@ abstract class VirtualHost(
         }
     }
 
-    public fun setDirectoryListingEnabled(directoryListingEnabled: Boolean) {
+    fun setDirectoryListingEnabled(directoryListingEnabled: Boolean) {
         (fallbackHandler as VirtualHostRouteHandler).setDirectoryListingEnabled(directoryListingEnabled)
     }
 
-    public open fun privateHtml() : Path {
+    open fun privateHtml(): Path {
         return documentRoot().resolve("private_html")
     }
 
-    public open fun publicHtml() : Path {
+    open fun publicHtml(): Path {
         return documentRoot().resolve("public_html")
     }
 
-    public open fun documentRoot() : Path {
+    open fun sslConfig(): Path {
+        return documentRoot().resolve("ssl")
+    }
+
+    open fun documentRoot(): Path {
         return Paths.get("/web/$name")
+    }
+
+    companion object {
+        private const val KEY = "SESSION_MANAGER"
     }
 
 }
