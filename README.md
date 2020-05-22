@@ -1,9 +1,9 @@
 # undertow-vh
 This library is serving as a wrapper for Java's most performant webserver `undertow` to easily manage and deploy multiple virtual hosts.
 
-## Gradle (coming soon)
+## Gradle
 ```
-implementation 'com.displee:undertow-vh:1.0'
+implementation 'com.displee:undertow-vh:1.2-SNAPSHOT'
 ```
 ## Usage
 
@@ -44,11 +44,13 @@ Class based routes must be placed in a package named 'route'. This 'route' packa
 package com.displee.web.localhost.route
 
 import com.displee.undertow.host.route.*
+import com.displee.undertow.host.route.impl.TemplateRouteHandler
 import com.google.gson.JsonObject
 import io.undertow.server.HttpServerExchange
+import io.undertow.util.Methods
 
-@RouteManifest("/register", GET)
-class SampleRoute : RouteHandler() {
+@RouteManifest("/register", Methods.GET_STRING)
+class SampleRoute : TemplateRouteHandler() {
 
     override fun handleRequest(exchange: HttpServerExchange) {
         //check if we've received the required query params
