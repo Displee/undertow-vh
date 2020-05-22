@@ -1,11 +1,13 @@
 package com.displee.undertow.util
 
 import com.displee.io.impl.OutputBuffer
+import java.io.File
 import java.nio.charset.Charset
 import java.nio.file.Path
 
 object ResourceUtils {
 
+    private const val RESOURCE_SEPARATOR = '/'
     private const val DEFAULT_RESOURCE_CAPACITY = 1024 //resources are not that big right?
     private var buffer = ByteArray(DEFAULT_RESOURCE_CAPACITY * 4)
     private var cache = true
@@ -57,7 +59,11 @@ object ResourceUtils {
     }
 
     fun formatPath(path: Path): String {
-        return path.toString().replace("\\", "/")
+        var p = path.toString().replace(File.separatorChar, RESOURCE_SEPARATOR)
+        if (!p.startsWith(RESOURCE_SEPARATOR)) {
+            p = "$RESOURCE_SEPARATOR$p"
+        }
+        return p
     }
 
     fun clearCache() {

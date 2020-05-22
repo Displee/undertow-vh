@@ -2,7 +2,6 @@ package com.displee.undertow.server
 
 import com.displee.undertow.host.VirtualHost
 import com.displee.undertow.host.VirtualHostManager
-import com.displee.undertow.logger.log
 import com.displee.undertow.ssl.SSLContextFactory
 import io.undertow.Undertow
 import io.undertow.UndertowOptions
@@ -11,18 +10,19 @@ import io.undertow.server.HttpServerExchange
 
 open class UndertowVH(private val host: String, private val port: Int, private val sslPort: Int): HttpHandler {
 
+    private val logger = mu.KotlinLogging.logger {}
     private val virtualHostManager = VirtualHostManager()
 
     constructor(host: String, port: Int): this(host, port, -1)
 
     fun start() {
         val hosts = virtualHostManager.hosts.keys
-        log("Initializing UndertowVH with ${hosts.size} hosts: $hosts.")
+        logger.debug("Initializing UndertowVH with ${hosts.size} hosts: $hosts.")
         val builder = Undertow.builder()
         onBuild(builder)
         val server = builder.build()
         server.start()
-        log("UndertowVH is listening for requests on $host:$port" + (if (sslPort != -1) " and $sslPort" else "") + ".")
+        logger.debug("UndertowVH is listening for requests on $host:$port" + (if (sslPort != -1) " and $sslPort" else "") + ".")
     }
 
     open fun onBuild(builder: Undertow.Builder) {
@@ -47,7 +47,7 @@ open class UndertowVH(private val host: String, private val port: Int, private v
     override fun handleRequest(exchange: HttpServerExchange) {
         val virtualHost = virtualHostManager.resolve(exchange.hostName)
         if (virtualHost == null) {
-            log("No virtual host found for ${exchange.hostName}.")
+            logger.warn("No virtual host found for ${exchange.hostName}.")
             return
         }
         virtualHost.handle(exchange)

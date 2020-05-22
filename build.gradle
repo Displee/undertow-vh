@@ -8,7 +8,7 @@ archivesBaseName = 'undertow-vh'
 
 allprojects {
     group 'com.displee'
-    version '1.0-SNAPSHOT'
+    version '1.1-SNAPSHOT'
 }
 
 repositories {
@@ -19,6 +19,7 @@ dependencies {
     compile fileTree(dir: 'lib', include: ['*.jar'])
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
     implementation 'log4j:log4j:1.2.17'
+    implementation 'io.github.microutils:kotlin-logging:1.7.9'
 
     implementation 'io.pebbletemplates:pebble:3.1.2'
     implementation 'com.github.subchen:jetbrick-template:2.1.10'

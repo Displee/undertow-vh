@@ -1,15 +1,13 @@
 package com.displee.undertow.host
 
-import com.displee.undertow.host.route.RouteHandler
 import com.displee.undertow.host.route.RouteManifest
 import com.displee.undertow.host.route.VirtualHostRouteHandler
-import com.displee.undertow.logger.err
-import com.displee.undertow.logger.log
+import com.displee.undertow.host.route.impl.TemplateRouteHandler
 import io.undertow.predicate.Predicate
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
 import io.undertow.server.RoutingHandler
-import io.undertow.server.handlers.resource.PathResourceManager
+import io.undertow.server.handlers.resource.ClassPathResourceManager
 import io.undertow.server.session.*
 import io.undertow.util.HttpString
 import io.undertow.util.Methods
@@ -19,12 +17,14 @@ import java.nio.file.Paths
 
 abstract class VirtualHost(private val name: String, vararg hosts: String) : RoutingHandler() {
 
+    private val logger = mu.KotlinLogging.logger {}
+
     var hosts: Array<String> = arrayOf(*hosts)
 
     private val sessionManager: SessionManager = InMemorySessionManager(KEY)
     private val sessionConfig: SessionConfig = SessionCookieConfig()
     private val sessionHandler = SessionAttachmentHandler(this, sessionManager, sessionConfig)
-    private val resourceManager = PathResourceManager(publicHtml(), 100)
+    private val resourceManager = ClassPathResourceManager(ClassLoader.getSystemClassLoader(), publicHtml().toString())
 
     init {
         if (this.hosts.isEmpty()) {
@@ -40,7 +40,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     open fun routes() {
         val reflections = Reflections(javaClass.`package`.name + ".route")
         var count = 0
-        val classes = reflections.getSubTypesOf(RouteHandler::class.java)
+        val classes = reflections.getSubTypesOf(TemplateRouteHandler::class.java)
         for (classz in classes) {
             try {
                 val instance = classz.newInstance()
@@ -50,10 +50,10 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
                 count++
             } catch (t: Throwable) {
                 t.printStackTrace()
-                err("Unable to instantiate ${classz.simpleName}.")
+                logger.error("Unable to instantiate ${classz.simpleName}.")
             }
         }
-        log("Registered $count/${classes.size} routes for hosts: ${hosts.contentToString()}.")
+        logger.debug("Registered $count/${classes.size} routes for hosts: ${hosts.contentToString()}.")
     }
 
     fun handle(exchange: HttpServerExchange) {
@@ -65,7 +65,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     }
 
     fun get(template: String?, path: Path, model: Map<String, String>): RoutingHandler {
-        return get(template, object : RouteHandler() {
+        return get(template, object : TemplateRouteHandler() {
             override fun path(): Path? {
                 return path
             }
@@ -95,7 +95,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     }
 
     private fun ensureVirtualHost(handler: HttpHandler?) {
-        if (handler is RouteHandler) {
+        if (handler is TemplateRouteHandler) {
             handler.virtualHost = this
         }
     }
@@ -117,7 +117,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     }
 
     open fun documentRoot(): Path {
-        return Paths.get("/web/$name")
+        return Paths.get("web", name)
     }
 
     companion object {

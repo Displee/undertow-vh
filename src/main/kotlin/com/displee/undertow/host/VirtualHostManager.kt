@@ -1,11 +1,10 @@
 package com.displee.undertow.host
 
-import com.displee.undertow.logger.err
-import com.displee.undertow.logger.warn
 import io.undertow.server.RoutingHandler
 
 class VirtualHostManager : RoutingHandler() {
 
+    private val logger = mu.KotlinLogging.logger {}
     val hosts = HashMap<String, VirtualHost>()
 
     fun register(virtualHost: VirtualHost): Boolean {
@@ -15,10 +14,10 @@ class VirtualHostManager : RoutingHandler() {
                 continue
             }
             register = false
-            err("There is already a host name registered for host name: $hostName.")
+            logger.error("There is already a host name registered for host name: $hostName.")
         }
         if (!register) {
-            err("Failed to register virtual host.")
+            logger.error("Failed to register virtual host.")
             return false
         }
         for(hostName in virtualHost.hosts) {
@@ -30,7 +29,7 @@ class VirtualHostManager : RoutingHandler() {
     fun resolve(hostName: String) : VirtualHost? {
         val virtualHost = hosts[hostName]
         if (virtualHost == null) {
-            warn("No virtual host found for host name: $hostName.")
+            logger.warn("No virtual host found for host name: $hostName.")
             return null
         }
         return virtualHost

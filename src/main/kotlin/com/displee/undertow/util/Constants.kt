@@ -1,6 +1,5 @@
 package com.displee.undertow.util
 
-import com.google.common.base.Charsets
 import java.nio.charset.Charset
 import java.util.*
 

@@ -1,3 +1,5 @@
 package com.displee.undertow.host.route
 
-annotation class RouteManifest(val route: String, val method: String = GET)
+import io.undertow.util.Methods
+
+annotation class RouteManifest(val route: String, val method: String = Methods.GET_STRING)

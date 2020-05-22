@@ -1,6 +1,5 @@
 package com.displee.undertow.host.route
 
-import com.displee.undertow.logger.log
 import com.displee.undertow.util.CHARSET
 import com.google.common.net.MediaType
 import com.google.gson.JsonElement
@@ -17,6 +16,8 @@ import java.io.File
 import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.collections.set
+
+private val logger = mu.KotlinLogging.logger {}
 
 fun HttpServerExchange.redirect(url: String) {
     statusCode = StatusCodes.FOUND
@@ -35,14 +36,14 @@ fun HttpServerExchange.getSession(): Session {
 }
 
 fun HttpServerExchange.checkFormData(vararg params: String): Boolean {
-    return RoutExtension.check(getFormDataAsMap(), *params)
+    return check(parseFormDataAsMap(), *params)
 }
 
 fun HttpServerExchange.checkQueryParameters(vararg params: String): Boolean {
-    return RoutExtension.check(getQueryParametersAsMap(), *params)
+    return check(getQueryParametersAsMap(), *params)
 }
 
-fun HttpServerExchange.getFormDataAsJson(): JsonObject {
+fun HttpServerExchange.parseFormDataAsJson(): JsonObject {
     val json = JsonObject()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -65,7 +66,7 @@ fun HttpServerExchange.getQueryParametersAsJson(): JsonObject {
     return json
 }
 
-fun HttpServerExchange.getFormDataAsMap(): Map<String, String> {
+fun HttpServerExchange.parseFormDataAsMap(): Map<String, String> {
     val map = HashMap<String, String>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -91,7 +92,7 @@ fun HttpServerExchange.getQueryParametersAsMap(): Map<String, String> {
     return map
 }
 
-fun HttpServerExchange.getAllFormData(): Map<String, Array<String>> {
+fun HttpServerExchange.parseAllFormData(): Map<String, Array<String>> {
     val map = HashMap<String, Array<String>>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -109,7 +110,7 @@ fun HttpServerExchange.getAllFormData(): Map<String, Array<String>> {
     return map
 }
 
-fun HttpServerExchange.getFileFormData(): Map<String, File> {
+fun HttpServerExchange.parseFileFormData(): Map<String, File> {
     val map = HashMap<String, File>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -127,7 +128,7 @@ fun HttpServerExchange.getFileFormData(): Map<String, File> {
     return map
 }
 
-fun HttpServerExchange.getAllFileFormData(): Map<String, Array<File>> {
+fun HttpServerExchange.parseAllFileFormData(): Map<String, Array<File>> {
     val map = HashMap<String, Array<File>>()
     loopThroughFormData(this) { formData ->
         for (key in formData) {
@@ -153,9 +154,14 @@ private fun loopThroughFormData(exchange: HttpServerExchange, unit: (fromData: F
         val formData = formDataParser.parseBlocking()
         unit.apply { formData }
         exchange.startBlocking(null)
-    } catch(e: Exception) {
-        log(e)
+    } catch(t: Throwable) {
+        logger.error("", t)
     }
+}
+
+fun HttpServerExchange.send(string: String) {
+    responseHeaders.put(Headers.CONTENT_TYPE, MediaType.PLAIN_TEXT_UTF_8.toString())
+    responseSender.send(string)
 }
 
 fun HttpServerExchange.send(json: JsonElement) {
@@ -163,26 +169,20 @@ fun HttpServerExchange.send(json: JsonElement) {
     responseSender.send(json.toString())
 }
 
-class RoutExtension {
-
-    companion object {
-        fun check(form: JsonObject, vararg params: String): Boolean {
-            for(param in params) {
-                if (form.get(param) == null) {
-                    return false
-                }
-            }
-            return true
-        }
-
-        fun check(form: Map<String, String>, vararg params: String): Boolean {
-            for(param in params) {
-                if (form[param] == null) {
-                    return false
-                }
-            }
-            return true
+fun check(form: JsonObject, vararg params: String): Boolean {
+    for(param in params) {
+        if (form.get(param) == null) {
+            return false
         }
     }
+    return true
+}
 
+fun check(form: Map<String, String>, vararg params: String): Boolean {
+    for(param in params) {
+        if (form[param] == null) {
+            return false
+        }
+    }
+    return true
 }
