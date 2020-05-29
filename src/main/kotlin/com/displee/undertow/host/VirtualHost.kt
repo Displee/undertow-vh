@@ -12,6 +12,7 @@ import io.undertow.server.session.*
 import io.undertow.util.HttpString
 import io.undertow.util.Methods
 import org.reflections.Reflections
+import java.lang.reflect.Modifier
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -42,10 +43,13 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
         var count = 0
         val classes = reflections.getSubTypesOf(TemplateRouteHandler::class.java)
         for (classz in classes) {
+            if (classz.isInterface || Modifier.isAbstract(classz.modifiers)) {
+                continue
+            }
+            val manifest = javaClass.getAnnotation(RouteManifest::class.java) ?: continue
             try {
                 val instance = classz.newInstance()
                 instance.virtualHost = this
-                val manifest = instance.javaClass.getAnnotation(RouteManifest::class.java) ?: continue
                 add(HttpString(manifest.method), manifest.route, instance)
                 count++
             } catch (t: Throwable) {
