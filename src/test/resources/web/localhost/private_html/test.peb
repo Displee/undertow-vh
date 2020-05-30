@@ -1,17 +1,12 @@
+{% extends "./base.peb" %}
+
 {# @pebvariable name="session" type="io.undertow.server.session.Session" #}
 {# @pebvariable name="request_uri" type="java.lang.String" #}
-{# @pebvariable name="message" type="java.lang.String" #}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Test</title>
-</head>
-<body>
-    You're currently on route: "{{ request_uri }}"
-    <br/>
-    Your session id is: {{ session.id }}
-    <br/>
-    {{ message }}
-</body>
-</html>
+
+{% block route %}
+    {{ request_uri }}
+{% endblock %}
+
+{% block session_id %}
+    {{ session.id }}
+{% endblock %}

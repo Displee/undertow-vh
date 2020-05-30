@@ -46,7 +46,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
             if (classz.isInterface || Modifier.isAbstract(classz.modifiers)) {
                 continue
             }
-            val manifest = javaClass.getAnnotation(RouteManifest::class.java) ?: continue
+            val manifest = classz.getAnnotation(RouteManifest::class.java) ?: continue
             try {
                 val instance = classz.newInstance()
                 instance.virtualHost = this

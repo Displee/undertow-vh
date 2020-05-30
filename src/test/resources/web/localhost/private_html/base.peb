@@ -1,0 +1,17 @@
+{# @pebvariable name="session" type="io.undertow.server.session.Session" #}
+{# @pebvariable name="request_uri" type="java.lang.String" #}
+{# @pebvariable name="message" type="java.lang.String" #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+</head>
+<body>
+You're currently on route: "{% block route %} {% endblock %}"
+<br/>
+Your session id is: {% block session_id %} {% endblock %}
+<br/>
+{{ message }}
+</body>
+</html>
