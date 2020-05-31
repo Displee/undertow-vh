@@ -3,6 +3,7 @@ package com.displee.undertow.template.impl
 import com.displee.undertow.template.TemplateProcessor
 import com.displee.undertow.template.TemplateProcessorManifest
 import com.displee.undertow.template.loader.FileResourceLoader
+import com.displee.undertow.util.ResourceUtils
 import com.mitchellbosecke.pebble.PebbleEngine
 import java.io.StringWriter
 import java.nio.file.Path
@@ -10,7 +11,7 @@ import java.nio.file.Path
 @TemplateProcessorManifest("peb", "twig")
 class PebbleTemplateProcessor: TemplateProcessor {
 
-    private val engine = PebbleEngine.Builder().loader(FileResourceLoader()).build()
+    private val engine = PebbleEngine.Builder().cacheActive(ResourceUtils.cache).loader(FileResourceLoader()).build()
 
     override fun render(path: Path, model: Map<String, Any>): String {
         val template = engine.getTemplate(path.toString())

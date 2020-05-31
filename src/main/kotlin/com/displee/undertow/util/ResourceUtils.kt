@@ -2,7 +2,7 @@ package com.displee.undertow.util
 
 import com.displee.io.impl.OutputBuffer
 import java.io.File
-import java.nio.charset.Charset
+import java.io.InputStream
 import java.nio.file.Path
 
 object ResourceUtils {
@@ -10,16 +10,15 @@ object ResourceUtils {
     private const val RESOURCE_SEPARATOR = '/'
     private const val DEFAULT_RESOURCE_CAPACITY = 1024 //resources are not that big right?
     private var buffer = ByteArray(DEFAULT_RESOURCE_CAPACITY * 4)
-    private var cache = true
+    var cache = true
 
     private val cached = HashMap<String, ByteArray>()
 
-    fun cache() {
-        cache = true
-    }
-
-    fun unCache() {
-        cache = false
+    private fun loadResource(path: String): InputStream? {
+        val resource = this.javaClass.classLoader.getResource(path.substring(1)) ?: return null
+        val connection = resource.openConnection()
+        connection.useCaches = cache
+        return connection.getInputStream()
     }
 
     fun get(path: Path): ByteArray? {
@@ -29,7 +28,7 @@ object ResourceUtils {
         if (cachedData != null) {
             return cachedData
         }
-        val stream = ResourceUtils::class.java.getResourceAsStream(stringPath) ?: return null
+        val stream = loadResource(stringPath) ?: return null
         val output = OutputBuffer(DEFAULT_RESOURCE_CAPACITY)
         var length: Int
         while((stream.read(buffer).also { length = it }) > 0) {
@@ -50,12 +49,9 @@ object ResourceUtils {
 
     fun exists(path: Path): Boolean {
         val stringPath = formatPath(path)
-        val stream = ResourceUtils::class.java.getResourceAsStream(stringPath)
-        val exists = stream != null
-        if (exists) {
-            stream.close()
-        }
-        return exists
+        val stream = loadResource(stringPath)
+        stream?.close()
+        return stream != null
     }
 
     fun formatPath(path: Path): String {
