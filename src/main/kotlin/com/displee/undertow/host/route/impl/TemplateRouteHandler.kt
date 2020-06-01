@@ -50,7 +50,7 @@ abstract class TemplateRouteHandler : HttpHandler {
     }
 
     open fun model(exchange: HttpServerExchange) {
-        model[REQUEST_URI] = exchange.requestURI
+        model[EXCHANGE] = exchange
         model[SESSION] = exchange.getSession()
     }
 
@@ -59,8 +59,8 @@ abstract class TemplateRouteHandler : HttpHandler {
     }
 
     companion object {
-        const val REQUEST_URI = "request_uri"
-        const val SESSION = "session"
+        private const val EXCHANGE = "exchange"
+        private const val SESSION = "session"
     }
 
 }
