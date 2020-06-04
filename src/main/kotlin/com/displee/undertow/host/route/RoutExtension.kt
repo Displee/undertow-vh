@@ -35,14 +35,6 @@ fun HttpServerExchange.getSession(): Session {
     return session
 }
 
-fun HttpServerExchange.checkFormData(vararg params: String): Boolean {
-    return check(parseFormDataAsMap(), *params)
-}
-
-fun HttpServerExchange.checkQueryParameters(vararg params: String): Boolean {
-    return check(getQueryParametersAsMap(), *params)
-}
-
 fun HttpServerExchange.parseFormDataAsJson(): JsonObject {
     val json = JsonObject()
     loopThroughFormData(this) { formData ->
@@ -169,20 +161,40 @@ fun HttpServerExchange.send(json: JsonElement) {
     responseSender.send(json.toString())
 }
 
-fun check(form: JsonObject, vararg params: String): Boolean {
+fun Map<String, String>.containsNullOrBlank(vararg params: String): Boolean {
     for(param in params) {
-        if (form.get(param) == null) {
-            return false
+        if (this[param].isNullOrBlank()) {
+            return true
         }
     }
-    return true
+    return false
 }
 
-fun check(form: Map<String, String>, vararg params: String): Boolean {
+fun Map<String, String>.containsNotNullOrBlank(vararg params: String): Boolean {
     for(param in params) {
-        if (form[param] == null) {
-            return false
+        if (!this[param].isNullOrBlank()) {
+            return true
         }
     }
-    return true
+    return false
+}
+
+fun JsonObject.containsNullOrBlank(vararg params: String): Boolean {
+    for(param in params) {
+        val value = get(param)
+        if (value == null || (value.isJsonPrimitive && value.asString.isNullOrBlank())) {
+            return true
+        }
+    }
+    return false
+}
+
+fun JsonObject.containsNotNullOrBlank(vararg params: String): Boolean {
+    for(param in params) {
+        val value = get(param)
+        if (value != null && !(value.isJsonPrimitive && value.asString.isNullOrBlank())) {
+            return true
+        }
+    }
+    return false
 }

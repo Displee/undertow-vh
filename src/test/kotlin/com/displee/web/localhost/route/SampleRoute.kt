@@ -11,11 +11,11 @@ class SampleRoute : TemplateRouteHandler() {
 
     override fun handleRequest(exchange: HttpServerExchange) {
         //check if we've received the required query params
-        if (!exchange.checkQueryParameters("username", "first_name", "last_name")) {
+        val queryParameters = exchange.getQueryParametersAsMap()
+        if (queryParameters.containsNullOrBlank("username", "first_name", "last_name")) {
             exchange.send("Error received not enough parameters.")
             return
         }
-        val queryParameters = exchange.getQueryParametersAsMap()
         val username = queryParameters["username"]
         val firstName = queryParameters["first_name"]
         val lastName = queryParameters["last_name"]
