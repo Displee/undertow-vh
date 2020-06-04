@@ -144,7 +144,7 @@ private fun loopThroughFormData(exchange: HttpServerExchange, unit: (fromData: F
         val formDataParser = factory.createParser(exchange) ?: return
         exchange.startBlocking()
         val formData = formDataParser.parseBlocking()
-        unit.apply { formData }
+        unit(formData)
         exchange.startBlocking(null)
     } catch(t: Throwable) {
         logger.error("", t)
