@@ -41,7 +41,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     open fun routes() {
         val reflections = Reflections(javaClass.`package`.name + ".route")
         var count = 0
-        val classes = reflections.getSubTypesOf(TemplateRouteHandler::class.java)
+        val classes = reflections.getSubTypesOf(HttpHandler::class.java)
         for (classz in classes) {
             if (classz.isInterface || Modifier.isAbstract(classz.modifiers)) {
                 continue
@@ -49,7 +49,9 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
             val manifest = classz.getAnnotation(RouteManifest::class.java) ?: continue
             try {
                 val instance = classz.newInstance()
-                instance.virtualHost = this
+                if (instance is TemplateRouteHandler) {
+                    instance.virtualHost = this
+                }
                 add(HttpString(manifest.method), manifest.route, instance)
                 count++
             } catch (t: Throwable) {
