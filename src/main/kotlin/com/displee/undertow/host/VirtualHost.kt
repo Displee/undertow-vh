@@ -1,6 +1,7 @@
 package com.displee.undertow.host
 
 import com.displee.undertow.host.route.RouteManifest
+import com.displee.undertow.host.route.VirtualHostRoute
 import com.displee.undertow.host.route.VirtualHostRouteHandler
 import com.displee.undertow.host.route.impl.TemplateRouteHandler
 import io.undertow.predicate.Predicate
@@ -49,7 +50,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
             val manifest = classz.getAnnotation(RouteManifest::class.java) ?: continue
             try {
                 val instance = classz.newInstance()
-                if (instance is TemplateRouteHandler) {
+                if (instance is VirtualHostRoute) {
                     instance.virtualHost = this
                 }
                 add(HttpString(manifest.method), manifest.route, instance)

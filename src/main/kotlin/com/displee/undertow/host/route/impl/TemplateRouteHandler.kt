@@ -1,6 +1,7 @@
 package com.displee.undertow.host.route.impl
 
 import com.displee.undertow.host.VirtualHost
+import com.displee.undertow.host.route.VirtualHostRoute
 import com.displee.undertow.host.route.getSession
 import com.displee.undertow.template.TemplateProcessorAdapter
 import com.displee.undertow.util.CHARSET
@@ -13,11 +14,11 @@ import org.apache.commons.io.FilenameUtils
 import java.nio.file.Files
 import java.nio.file.Path
 
-abstract class TemplateRouteHandler : HttpHandler {
+abstract class TemplateRouteHandler : HttpHandler, VirtualHostRoute {
 
     private val logger = mu.KotlinLogging.logger {}
 
-    lateinit var virtualHost: VirtualHost
+    override lateinit var virtualHost: VirtualHost
 
     protected val model = HashMap<String, Any>()
 
