@@ -13,6 +13,7 @@ import io.undertow.util.Headers
 import org.apache.commons.io.FilenameUtils
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class TemplateRouteHandler : HttpHandler, VirtualHostRoute {
 
@@ -20,7 +21,7 @@ abstract class TemplateRouteHandler : HttpHandler, VirtualHostRoute {
 
     override lateinit var virtualHost: VirtualHost
 
-    protected val model = HashMap<String, Any>()
+    protected val model = hashMapOf<String, Any>()
 
     override fun handleRequest(exchange: HttpServerExchange) {
         val path = path()
@@ -43,7 +44,8 @@ abstract class TemplateRouteHandler : HttpHandler, VirtualHostRoute {
             contentType = Files.probeContentType(path) ?: ENCODING
         } else {
             model(exchange)
-            output = templateProcessor.render(path, model)
+            output = templateProcessor.render(path, ConcurrentHashMap(model))
+            model.clear()
             contentType = templateProcessor.contentType()
         }
         exchange.responseHeaders.put(Headers.CONTENT_TYPE, contentType)

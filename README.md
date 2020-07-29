@@ -3,7 +3,7 @@ This library is serving as a wrapper for Java's most performant webserver `under
 
 ## Gradle
 ```
-implementation 'com.displee:undertow-vh:2.9-SNAPSHOT'
+implementation 'com.displee:undertow-vh:3.0-SNAPSHOT'
 ```
 ## Usage
 
