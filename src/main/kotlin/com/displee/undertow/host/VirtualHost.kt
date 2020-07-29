@@ -81,6 +81,11 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
             override fun path(): Path? {
                 return path
             }
+
+            override fun model(exchange: HttpServerExchange) {
+                super.model(exchange)
+                this.model.putAll(model)
+            }
         })
     }
 
