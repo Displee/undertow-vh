@@ -71,6 +71,19 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
         return get(template, path, mapOf())
     }
 
+    fun get(template: String?, path: Path, handler: (it: HttpServerExchange) -> Unit): RoutingHandler {
+        return get(template, object : TemplateRouteHandler() {
+            override fun handleRequest(exchange: HttpServerExchange) {
+                handler(exchange)
+                super.handleRequest(exchange)
+            }
+
+            override fun path(): Path? {
+                return path
+            }
+        })
+    }
+
     fun get(template: String?, path: Path, model: Map<String, String>): RoutingHandler {
         return get(template, object : TemplateRouteHandler() {
             override fun path(): Path? {
