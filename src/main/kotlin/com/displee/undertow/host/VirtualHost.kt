@@ -4,6 +4,7 @@ import com.displee.undertow.host.route.RouteManifest
 import com.displee.undertow.host.route.VirtualHostRoute
 import com.displee.undertow.host.route.VirtualHostRouteHandler
 import com.displee.undertow.host.route.impl.TemplateRouteHandler
+import com.displee.undertow.host.route.parseFormDataAsMap
 import io.undertow.predicate.Predicate
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
@@ -33,6 +34,18 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
             this.hosts = arrayOf(name)
         }
         fallbackHandler = VirtualHostRouteHandler(resourceManager)
+    }
+
+    override fun handleRequest(exchange: HttpServerExchange) {
+        val form = exchange.parseFormDataAsMap()
+        val _method = form["_method"]
+        if (_method != null && _method.isNotEmpty()) {
+            val method = Methods.fromString(_method)
+            if (method != null) {
+                exchange.requestMethod = method
+            }
+        }
+        super.handleRequest(exchange)
     }
 
     fun initialize() {
