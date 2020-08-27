@@ -27,7 +27,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     private val sessionManager: SessionManager = InMemorySessionManager(KEY)
     private val sessionConfig: SessionConfig = SessionCookieConfig()
     private val sessionHandler = SessionAttachmentHandler(this, sessionManager, sessionConfig)
-    private val resourceManager = ClassPathResourceManager(ClassLoader.getSystemClassLoader(), publicHtml().toString())
+    private val resourceManager = ClassPathResourceManager(ClassLoader.getSystemClassLoader(), publicHtml().toString().replace("\\", "/"))
 
     init {
         if (this.hosts.isEmpty()) {
