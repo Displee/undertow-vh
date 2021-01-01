@@ -1,10 +1,7 @@
 package com.displee.undertow.host
 
-import com.displee.undertow.host.route.RouteManifest
-import com.displee.undertow.host.route.VirtualHostRoute
-import com.displee.undertow.host.route.VirtualHostRouteHandler
+import com.displee.undertow.host.route.*
 import com.displee.undertow.host.route.impl.TemplateRouteHandler
-import com.displee.undertow.host.route.parseFormDataAsMap
 import io.undertow.predicate.Predicate
 import io.undertow.server.HttpHandler
 import io.undertow.server.HttpServerExchange
@@ -28,12 +25,25 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     private val sessionConfig: SessionConfig = SessionCookieConfig()
     private val sessionHandler = SessionAttachmentHandler(this, sessionManager, sessionConfig)
     private val resourceManager = ClassPathResourceManager(ClassLoader.getSystemClassLoader(), publicHtml().toString().replace("\\", "/"))
+    private val resourceHandler = VirtualHostRouteHandler(resourceManager)
+    var pageNotFoundHandler = HttpHandler { it.send("404 page not found.") }
 
     init {
         if (this.hosts.isEmpty()) {
             this.hosts = arrayOf(name)
         }
-        fallbackHandler = VirtualHostRouteHandler(resourceManager)
+        fallbackHandler = HttpHandler {
+            if (it.isInIoThread) {
+                it.dispatch(this)
+                return@HttpHandler
+            }
+            resourceHandler.handleRequest(it)
+            if (it.isComplete) {
+                return@HttpHandler
+            }
+            pageNotFoundHandler.handleRequest(it)
+            return@HttpHandler
+        }
     }
 
     override fun handleRequest(exchange: HttpServerExchange) {
