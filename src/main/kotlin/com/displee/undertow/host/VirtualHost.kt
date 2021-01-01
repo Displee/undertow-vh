@@ -149,7 +149,7 @@ abstract class VirtualHost(private val name: String, vararg hosts: String) : Rou
     }
 
     fun setDirectoryListingEnabled(directoryListingEnabled: Boolean) {
-        (fallbackHandler as VirtualHostRouteHandler).setDirectoryListingEnabled(directoryListingEnabled)
+        resourceHandler.setDirectoryListingEnabled(directoryListingEnabled)
     }
 
     open fun privateHtml(): Path {
