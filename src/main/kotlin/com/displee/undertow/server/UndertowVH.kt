@@ -27,7 +27,7 @@ open class UndertowVH(private val host: String, private val port: Int, private v
 
     open fun onBuild(builder: Undertow.Builder) {
         val version = System.getProperty("java.version")
-        if (!(version[0].toString().toInt() == 1 && version[2].toString().toInt() < 8)) {
+        if (!(version[0] == '1' && version[2].toString().toInt() < 8) && !disableHttp2) {
             builder.setServerOption(UndertowOptions.ENABLE_HTTP2, true)
         }
         builder.addHttpListener(port, host)
@@ -51,6 +51,10 @@ open class UndertowVH(private val host: String, private val port: Int, private v
             return
         }
         virtualHost.handle(exchange)
+    }
+
+    companion object {
+        var disableHttp2 = false
     }
 
 }

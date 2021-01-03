@@ -8,7 +8,7 @@ archivesBaseName = 'undertow-vh'
 
 allprojects {
     group 'com.displee'
-    version '3.7-SNAPSHOT'
+    version '4.3-SNAPSHOT'
 }
 
 repositories {
