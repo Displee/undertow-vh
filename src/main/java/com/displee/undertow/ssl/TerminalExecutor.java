@@ -1,14 +1,23 @@
 package com.displee.undertow.ssl;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Nick Hartskeerl
  */
 public class TerminalExecutor {
+
+	private static final Pattern JDK_REGEX = Pattern.compile("jdk[0-9].[0-9].[0-9]_(.*?)" + StringEscapeUtils.escapeJava(File.separator));
 
     public static void process(String[] args, Runtime runtime, File workDir) throws IOException, InterruptedException {
     	process(args, runtime, workDir, null, null);
@@ -73,6 +82,33 @@ public class TerminalExecutor {
 	        }
 	        
 	    }
+	}
+
+	public static String findJDKPath() {
+    	Enumeration<Object> properties = System.getProperties().elements();
+    	List<String> possibilities = new ArrayList<>();
+    	String separator = System.getProperty("path.separator");
+    	while(properties.hasMoreElements()) {
+    		Object element = properties.nextElement();
+    		if (!(element instanceof String)) {
+    			continue;
+			}
+    		String string = (String) element;
+    		String[] split = string.split(separator);
+    		for(String s : split) {
+				if (s.contains("jdk") && s.contains(File.separator)) {
+					possibilities.add(s);
+				}
+			}
+		}
+    	for(String s : possibilities) {
+			Matcher matcher = JDK_REGEX.matcher(s);
+			if (matcher.find()) {
+				String group = matcher.group();
+				return s.substring(0, s.indexOf(group) + group.length());
+			}
+		}
+    	return null;
 	}
 	
 }

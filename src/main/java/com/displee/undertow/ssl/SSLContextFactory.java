@@ -133,9 +133,9 @@ public class SSLContextFactory {
 			
 		}
 		
-		File privateKey = sslConfig.resolve("certificate.key").toFile();
-		File certificate = sslConfig.resolve("certificate.crt").toFile();
-		File intermediate = sslConfig.resolve("intermediate.crt").toFile();
+		File privateKey = sslConfig.resolve("privkey.pem").toFile();
+		File certificate = sslConfig.resolve("cert.pem").toFile();
+		File intermediate = sslConfig.resolve("chain.pem").toFile();
 		
 		if(!privateKey.exists() || !certificate.exists() || !intermediate.exists()) {
 			return null;
@@ -156,7 +156,7 @@ public class SSLContextFactory {
 			String[] string = { "openssl", "pkcs12", "-export", "-out", output.getAbsolutePath(), "-inkey", privateKey.getAbsolutePath(), "-in", certificate.getAbsolutePath(), "-certfile", intermediate.getAbsolutePath(), "-password", "pass:"+password, "-name", host };
 			TerminalExecutor.process(string, Runtime.getRuntime(), workDirectory);
 			
-			string = new String[]{ "/usr/local/java/jdk1.8.0_112/bin/keytool", "-alias", host, "-v", "-importkeystore", "-srckeystore", output.getAbsolutePath(), "-srcstoretype", "PKCS12", "-destkeystore", keyStore.getAbsolutePath(), "-deststoretype", "JKS", "-storepass", password, "-keypass", password, "-srcstorepass", password };
+			string = new String[]{ TerminalExecutor.findJDKPath() + "bin" + File.separator + "keytool", "-alias", host, "-v", "-importkeystore", "-srckeystore", output.getAbsolutePath(), "-srcstoretype", "PKCS12", "-destkeystore", keyStore.getAbsolutePath(), "-deststoretype", "JKS", "-storepass", password, "-keypass", password, "-srcstorepass", password };
 			TerminalExecutor.process(string, Runtime.getRuntime(), workDirectory);
 			
 			ExternalKeyStore externalKeyStore = new ExternalKeyStore(keyStore.toPath(), password);
