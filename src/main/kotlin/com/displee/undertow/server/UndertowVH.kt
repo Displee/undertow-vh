@@ -32,7 +32,7 @@ open class UndertowVH(private val host: String, private val port: Int, private v
         }
         builder.addHttpListener(port, host)
         if (sslPort != -1) {
-            builder.addHttpsListener(port, host, SSLContextFactory.create(virtualHostManager))
+            builder.addHttpsListener(sslPort, host, SSLContextFactory.create(virtualHostManager))
         }
         builder.setHandler(this)
     }
